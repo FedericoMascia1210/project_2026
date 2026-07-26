@@ -68,16 +68,20 @@ def DELETE(path):
 
 
 def clean_db():
-    """Remove all data using individual deletes that properly cascade
-    registrations, ensuring each test starts with an empty database.
+    """Remove all data using individual deletes that properly cascade registrations."""
+    users_resp = GET("/users")
+    if users_resp.status_code == 200:
+        users = users_resp.json()
+        for user in users:
+            username = user["username"] if isinstance(user, dict) else user
+            DELETE(f"/users/{username}")
 
-    Uses individual DELETE /users/{username} and DELETE /events/{id} instead
-    of bulk endpoints because the bulk endpoints do not cascade registrations.
-    """
-    for user in GET("/users").json():
-        DELETE(f"/users/{user['username']}")
-    for event in GET("/events").json():
-        DELETE(f"/events/{event['id']}")
+    events_resp = GET("/events")
+    if events_resp.status_code == 200:
+        events = events_resp.json()
+        for event in events:
+            event_id = event["id"] if isinstance(event, dict) else event
+            DELETE(f"/events/{event_id}")
 
 
 # ===========================================================================
